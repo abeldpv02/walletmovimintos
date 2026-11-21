@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2563eb">
+<title>Mi billetera USDT</title>
+<style>
+:root{color-scheme:light;--bg:#f4f7fc;--card:#fff;--ink:#0f1b33;--mute:#667794;--line:#e3e9f3;--in:#1d6fe8;--out:#e5484d;--acc:#2563eb;--accT:#fff;--hero:#2563eb}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:0 16px calc(92px + env(safe-area-inset-bottom));max-width:640px;margin-inline:auto;font-variant-numeric:tabular-nums}
+header{display:flex;align-items:center;gap:12px;padding:calc(16px + env(safe-area-inset-top)) 0 14px}
+.mark{width:40px;height:40px;border-radius:12px;background:var(--acc);color:#fff;display:grid;place-items:center;font-weight:800;font-size:1.25rem}
+h1{font-size:1.15rem;margin:0;line-height:1.2}h1 small{display:block;font-weight:400;color:var(--mute);font-size:.82rem}
+h2{font-size:1.05rem;margin:0 0 4px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px}
+.hero{background:linear-gradient(135deg,#1d4ed8,#3b82f6);color:#fff;border-radius:20px;padding:18px 18px 12px;margin-bottom:14px}
+.hero .lb{color:#dbe7ff;font-size:.9rem}
+.hero .big{font-size:2.5rem;font-weight:700;letter-spacing:-1px;line-height:1.15;margin:2px 0 4px}
+.hero .big small{font-size:1rem;font-weight:500;color:#dbe7ff;margin-left:8px;letter-spacing:0}
+.hero svg{width:100%;height:auto;display:block;touch-action:manipulation}
+#ci{font-size:.85rem;color:#dbe7ff;min-height:1.3em;padding-bottom:4px}
+select,input{width:100%;min-height:48px;padding:0 14px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);font:inherit}
+select{margin-bottom:14px;font-weight:600}input{margin-bottom:12px}
+label{display:block;font-size:.85rem;color:var(--mute);margin-bottom:6px}
+.btn{min-height:44px;padding:0 18px;border-radius:12px;border:1px solid var(--acc);background:var(--acc);color:var(--accT);font:inherit;font-weight:600;cursor:pointer}
+.btn.g{background:transparent;color:var(--acc)}.btn.d{background:transparent;color:var(--out);border-color:var(--line)}
+.btn.sm{min-height:40px;padding:0 14px;font-size:.9rem}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px}
+.stat span{color:var(--mute);font-size:.8rem}.stat b{display:block;font-size:1.05rem;margin-top:2px}
+.bar2{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+.chip{min-height:38px;padding:0 14px;border-radius:99px;border:1px solid var(--line);background:var(--card);color:var(--mute);font:inherit;font-size:.9rem;cursor:pointer}
+.chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.sp{flex:1}
+.day{font-size:.85rem;color:var(--mute);padding:14px 0 6px}.day:first-child{padding-top:0}
+.tx{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--line);text-decoration:none;color:inherit}
+.day+.tx{border-top:0}
+.ic{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;flex:none}
+.ic.in{background:color-mix(in srgb,var(--in) 15%,transparent);color:var(--in)}
+.ic.out{background:color-mix(in srgb,var(--out) 15%,transparent);color:var(--out)}
+.pr{display:flex;align-items:center;gap:14px;margin-bottom:14px}.pr .av{width:56px;height:56px;border-radius:50%;font-size:1.4rem}
+.kv{display:flex;justify-content:space-between;padding:10px 0;border-top:1px solid var(--line)}.kv:first-of-type{border-top:0}
+.ic svg{width:20px;height:20px}
+.mid{flex:1;min-width:0}.mid b{display:block;font-weight:600}.mid small{color:var(--mute)}
+.amt{font-weight:650;white-space:nowrap}.in{color:var(--in)}.out{color:var(--out)}.mute{color:var(--mute)}
+.empty{color:var(--mute);text-align:center;padding:18px 0}
+#msg{font-size:.88rem;color:var(--mute);min-height:1.3em;margin:-4px 2px 10px}
+.bar{height:12px;background:var(--line);border-radius:99px;overflow:hidden;margin:12px 0 8px}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--acc),#60a5fa);border-radius:99px;transition:width .3s}
+.total{background:linear-gradient(135deg,#1d4ed8,#3b82f6);color:#fff;border-radius:20px;padding:18px;margin-bottom:14px}
+.total .big{font-size:2rem;font-weight:700;letter-spacing:-.5px}.total small{color:#dbe7ff}
+.wc{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px}
+.wt{display:flex;align-items:center;gap:12px}
+.av{width:44px;height:44px;border-radius:14px;background:#e8f0ff;color:var(--acc);display:grid;place-items:center;font-weight:700;flex:none}
+.wt .mid b{font-size:1.02rem}.wt .bal{text-align:right;font-weight:700}.wt .bal small{display:block;color:var(--mute);font-weight:400}
+.wa{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.ask{margin-top:12px;padding:12px;border-radius:12px;background:color-mix(in srgb,var(--out) 10%,transparent)}
+.ask p{margin:0 0 10px;font-size:.92rem}.ask .btn{margin-right:8px}
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);display:flex;justify-content:center;padding:8px 16px calc(8px + env(safe-area-inset-bottom));gap:8px;z-index:5}
+nav button{flex:1;max-width:240px;display:flex;flex-direction:column;align-items:center;gap:2px;border:0;background:transparent;color:var(--mute);font:inherit;font-size:.8rem;padding:6px;border-radius:12px;cursor:pointer}
+nav button svg{width:24px;height:24px}nav button.on{color:var(--acc);background:color-mix(in srgb,var(--acc) 12%,transparent);font-weight:600}
+.hide{display:none!important}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+<header><div class="mark">₮</div><h1 id="hi">Mi billetera USDT<small>BNB Chain · BEP20</small></h1></header>
+
+<section id="v-panel">
+  <select id="sel"></select>
+  <div id="empty" class="card empty hide">Aún no tienes wallets.<br>Agrega la primera en la pestaña <b>Wallets</b>.</div>
+  <div id="main">
+    <div class="hero">
+      <div class="lb" id="hn"></div>
+      <div class="big"><span id="bal">0.00</span><small>USDT</small></div>
+      <svg id="chart" viewBox="0 0 600 230"></svg>
+      <div id="ci">Toca la gráfica para ver cada movimiento.</div>
+    </div>
+    <div id="link" class="card hide">
+      <b id="linkTxt">Vinculando wallet…</b>
+      <div class="bar"><i id="linkBar"></i></div>
+      <span class="mute" style="font-size:.85rem">Solo tarda la primera vez.</span>
+    </div>
+    <div id="msg"></div>
+    <div class="stats">
+      <div class="stat"><span>Recibido</span><b class="in" id="tin">0.00</b></div>
+      <div class="stat"><span>Enviado</span><b class="out" id="tout">0.00</b></div>
+      <div class="stat"><span>Movimientos</span><b id="tn">0</b></div>
+    </div>
+    <div class="bar2">
+      <button class="chip on" data-a="flt" data-v="all">Todos</button>
+      <button class="chip" data-a="flt" data-v="in">Recibidos</button>
+      <button class="chip" data-a="flt" data-v="out">Enviados</button>
+      <span class="sp"></span>
+      <button class="btn g sm" data-a="upd">Actualizar</button>
+      <button class="btn g sm" data-a="csv">CSV</button>
+    </div>
+    <div class="card" id="list"></div>
+  </div>
+</section>
+
+<section id="v-wallets" class="hide">
+  <div class="total"><div class="mute" style="color:#dbe7ff;font-size:.9rem">Fondos totales</div><div class="big"><span id="tot">0.00</span> <small>USDT</small></div></div>
+  <button class="btn" data-a="toggleadd" style="width:100%;margin-bottom:14px" id="addBtn">+ Agregar wallet</button>
+  <div class="card hide" id="addForm">
+    <h2>Nueva wallet</h2>
+    <label for="wn" style="margin-top:10px">Nombre</label>
+    <input id="wn" placeholder="Ej: Ahorros" autocomplete="off">
+    <label for="wa">Dirección (empieza con 0x)</label>
+    <input id="wa" placeholder="0x..." autocomplete="off">
+    <p class="mute" style="font-size:.85rem;margin:0 0 12px">Al vincular, la página trae sola los movimientos y el saldo actual.</p>
+    <button class="btn" data-a="add">Vincular wallet</button> <button class="btn g" data-a="conn">Conectar SafePal</button>
+    <div id="wmsg" class="mute" style="font-size:.88rem;margin-top:10px"></div>
+  </div>
+  <div id="wlist"></div>
+</section>
+
+<section id="v-perfil" class="hide">
+  <div class="card">
+    <div class="pr"><div class="av" id="pav">U</div><div class="mid"><b id="pnm">Tu perfil</b><small class="mute">Guardado solo en este dispositivo</small></div></div>
+    <label for="pn">Tu nombre</label>
+    <input id="pn" placeholder="Ej: Abel" maxlength="30" autocomplete="off">
+    <button class="btn" data-a="psave">Guardar</button>
+  </div>
+  <div class="card">
+    <h2>Resumen</h2>
+    <div class="kv"><span class="mute">Wallets</span><b id="pw">0</b></div>
+    <div class="kv"><span class="mute">Movimientos registrados</span><b id="pm">0</b></div>
+    <div class="kv"><span class="mute">Fondos totales</span><b id="pt">0.00 USDT</b></div>
+  </div>
+  <div class="card">
+    <h2>Mis datos</h2>
+    <p class="mute" style="margin:4px 0 12px;font-size:.9rem">Todo se guarda en tu navegador. Descarga el respaldo en Excel y, si pierdes los datos, pulsa “Cargar respaldo” y elige ese archivo.</p>
+    <button class="btn" data-a="backup">Descargar Excel</button> <button class="btn g" data-a="restore">Cargar respaldo</button>
+    <input type="file" id="rf" accept=".xlsx,.xls,.json" class="hide">
+    <div id="pmsg" class="mute" style="font-size:.88rem;margin-top:10px"></div>
+    <div id="wipe" style="margin-top:14px"></div>
+  </div>
+  <div class="card">
+    <h2>Respaldo automático diario</h2>
+    <p class="mute" style="margin:4px 0 12px;font-size:.9rem">Crea una copia en Excel por día, la primera vez que abras la página ese día. No funciona con la página cerrada.</p>
+    <div id="bkbox"></div>
+    <div id="bmsg" class="mute" style="font-size:.88rem;margin-top:10px"></div>
+  </div>
+  <div class="card">
+    <h2>Historial completo</h2>
+    <p class="mute" style="margin:4px 0 10px;font-size:.9rem">Para traer <b>todos</b> los movimientos desde el inicio hace falta una clave gratuita de MegaNode (NodeReal). Sin clave, la página solo revisa los últimos 7 días.</p>
+    <ol class="mute" style="margin:0 0 12px;padding-left:20px;font-size:.88rem"><li>Crea una cuenta gratis en <a href="https://dashboard.nodereal.io/" target="_blank" rel="noopener">dashboard.nodereal.io</a>.</li><li>Crea una API key para BNB Smart Chain.</li><li>Pégala aquí abajo.</li></ol>
+    <label for="mk">Clave de MegaNode</label>
+    <input id="mk" type="password" placeholder="Pega tu API key" autocomplete="off">
+    <button class="btn" data-a="mksave">Guardar clave</button> <button class="btn g" data-a="full">Cargar historial completo</button>
+    <div id="mkmsg" class="mute" style="font-size:.88rem;margin-top:10px"></div>
+  </div>
+</section>
+
+<nav>
+  <button id="t-panel" class="on" data-a="tab" data-v="panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 15 4-5 3 3 5-7"/></svg>Dashboard</button>
+  <button id="t-wallets" data-a="tab" data-v="wallets"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="14" rx="3"/><path d="M3 10h18M16 15h2"/></svg>Wallets</button>
+  <button id="t-perfil" data-a="tab" data-v="perfil"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg>Perfil</button>
+</nav>
+
+<script>
+const USDT='0x55d398326f99059fF775485246999027B3197955';
+const TOPIC='0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
+const RPCS=['https://bsc-rpc.publicnode.com','https://bsc-dataseed.bnbchain.org','https://bsc-dataseed1.defibit.io','https://bsc.drpc.org'];
+const $=id=>document.getElementById(id);
+const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const fmt=n=>n.toLocaleString('es',{minimumFractionDigits:2,maximumFractionDigits:2});
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const short=a=>a.slice(0,6)+'…'+a.slice(-4);
+const IN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 7 7 17M7 17h8M7 17V9"/></svg>';
+const OUT='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M17 7H9M17 7v8"/></svg>';
+let PROF=store.get('prof',{name:''}),wipeAsk=false,KEY=store.get('mkey','');
+let W=[],SEL=null,busy=false,PTS=[],flt='all',editId=null,editVal='',delId=null;
+
+(function(){
+  const s=store.get('w2',null);
+  if(s){W=s.list;SEL=s.sel;return}
+  const old=store.get('addr','');
+  if(old){W=[{id:1,name:'Principal',addr:old,last:store.get('last:'+old.toLowerCase(),0),txs:store.get('txs',{}),bal:null,days:3}];SEL=1}
+})();
+const save=()=>store.set('w2',{list:W,sel:SEL});
+const cur=()=>W.find(w=>w.id===SEL);
+const dlt=(x,me)=>x.to===me?(x.from===me?0:x.v):-x.v;
+
+async function rpc(method,params){
+  let err;
+  for(const url of RPCS.slice()){
+    try{
+      const r=await fetch(url,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method,params})});
+      const d=await r.json();
+      if(d.error)throw new Error(d.error.message);
+      RPCS.splice(RPCS.indexOf(url),1);RPCS.unshift(url);
+      return d.result;
+    }catch(e){err=e}
+  }
+  throw err;
+}
+const pad=a=>'0x'+a.toLowerCase().replace('0x','').padStart(64,'0');
+const hex=n=>'0x'+n.toString(16);
+const tsOf=async n=>parseInt((await rpc('eth_getBlockByNumber',[hex(n),false])).timestamp,16)*1000;
+const balanceOf=async a=>Number(BigInt(await rpc('eth_call',[{to:USDT,data:'0x70a08231'+pad(a).slice(2)},'latest'])))/1e18;
+const setProg=(p,t)=>{$('linkBar').style.width=p+'%';$('linkTxt').textContent=t};
+
+async function scan(w,from,to,first){
+  let size=5000,found=0;const bt={},me=w.addr.toLowerCase();
+  for(let start=from;start<=to;){
+    const end=Math.min(start+size-1,to);
+    try{
+      const o=await rpc('eth_getLogs',[{fromBlock:hex(start),toBlock:hex(end),address:USDT,topics:[TOPIC,null,pad(me)]}]);
+      const i=await rpc('eth_getLogs',[{fromBlock:hex(start),toBlock:hex(end),address:USDT,topics:[TOPIC,pad(me)]}]);
+      for(const l of [...o,...i]){
+        const id=l.transactionHash+':'+parseInt(l.logIndex,16);
+        if(w.txs[id])continue;
+        const bn=parseInt(l.blockNumber,16);
+        if(!bt[bn])bt[bn]=await tsOf(bn);
+        w.txs[id]={h:l.transactionHash,t:bt[bn],from:'0x'+l.topics[1].slice(26),to:'0x'+l.topics[2].slice(26),v:Number(BigInt(l.data))/1e18};
+        found++;
+      }
+      start=end+1;
+      const p=Math.min(100,Math.round((start-from)/(to-from+1)*100));
+      first?setProg(p,'Vinculando wallet… '+p+'%'):$('msg').textContent='Actualizando… '+p+'%';
+    }catch(e){if(size>500)size=Math.floor(size/2);else throw e}
+  }
+  return found;
+}
+
+async function mega(method,params){
+  const r=await fetch('https://bsc-mainnet.nodereal.io/v1/'+encodeURIComponent(KEY),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method,params})});
+  const d=await r.json();
+  if(d.error)throw new Error(d.error.message||'error de la API');
+  return d.result;
+}
+async function fullHistory(w,latest){
+  const me=w.addr.toLowerCase(),fresh={},bt={};
+  let useC=true,hasLog=false,last=0;
+  for(const dir of ['fromAddress','toAddress']){
+    let pk='';
+    for(;;){
+      const p={category:['20'],[dir]:me,order:'asc',excludeZeroValue:true,maxCount:'0x3e8',fromBlock:'0x0',toBlock:'latest'};
+      if(useC)p.contractAddresses=[USDT];
+      if(pk)p.pageKey=pk;
+      let res;
+      try{res=await mega('nr_getAssetTransfers',[p])}
+      catch(e){if(useC&&e.name!=='TypeError'){useC=false;continue}throw e}
+      for(const t of res.transfers||[]){
+        if((t.contractAddress||'').toLowerCase()!==USDT.toLowerCase())continue;
+        const h=t.hash||t.transactionHash||t.txHash;
+        if(!h)throw new Error('la API no devolvió el hash de la transacción');
+        const bn=parseInt(t.blockNum,16);
+        const li=t.logIndex!=null?(String(t.logIndex).startsWith('0x')?parseInt(t.logIndex,16):+t.logIndex):null;
+        if(li!==null)hasLog=true;
+        const from=t.from.toLowerCase(),to=(t.to||'').toLowerCase();
+        const v=Number(BigInt(t.value))/10**(+t.decimal||18);
+        let ts=+t.blockTimeStamp||0;
+        ts=ts?(ts<1e12?ts*1000:ts):(bt[bn]||(bt[bn]=await tsOf(bn)));
+        fresh[h+':'+(li!==null?li:bn+'-'+from+'-'+to+'-'+t.value)]={h,t:ts,from,to,v};
+        last=Math.max(last,bn);
+      }
+      const pct=Math.min(99,Math.round(last/latest*100));
+      setProg(pct,'Vinculando wallet… '+pct+'%');
+      pk=res.pageKey||'';
+      if(!pk)break;
+    }
+  }
+  w.txs=fresh;
+  w.last=hasLog?Math.max(1,latest-3000):latest;
+  return Object.keys(fresh).length;
+}
+
+async function sync(w,forceFull){
+  if(busy||!w)return;busy=true;
+  const wantFull=!!KEY&&(forceFull||(!w.full&&!w.fullFail));
+  const first=!w.last||wantFull;
+  if(first){$('link').classList.remove('hide');setProg(0,'Vinculando wallet…')}
+  let note='';
+  try{
+    const latest=parseInt(await rpc('eth_blockNumber',[]),16);
+    let n=0,done=false;
+    if(wantFull){
+      try{n=await fullHistory(w,latest);w.full=true;w.fullFail=false;done=true;note='Historial completo cargado: '+n+' movimientos.'}
+      catch(e){w.fullFail=true;note='No se pudo traer todo el historial ('+e.message+'). Se usó la búsqueda básica de '+(w.days||7)+' días.'}
+    }
+    if(!done){
+      let from;
+      if(w.last)from=w.last+1;
+      else{
+        const t1=await tsOf(latest),t0=await tsOf(latest-100000);
+        from=latest-Math.floor((w.days||7)*86400*100000/((t1-t0)/1000));
+      }
+      n=latest>=from?await scan(w,from,latest,first):0;
+      w.last=latest;
+    }
+    w.bal=await balanceOf(w.addr);save();
+    $('msg').textContent=note||(first?'':n+' movimientos nuevos · '+new Date().toLocaleTimeString('es'));
+  }catch(e){$('msg').textContent='Error: '+e.message+'. Intenta de nuevo en un momento.'}
+  $('link').classList.add('hide');busy=false;render();autoBackup(false);
+}
+
+function drawChart(w){
+  const el=$('chart'),me=w.addr.toLowerCase();
+  const arr=Object.values(w.txs).sort((a,b)=>a.t-b.t);
+  PTS=[];
+  if(!arr.length){el.innerHTML='<text x="300" y="115" fill="#dbe7ff" text-anchor="middle" font-size="20">Sin movimientos todavía</text>';return}
+  const net=arr.reduce((s,x)=>s+dlt(x,me),0);
+  let b=(w.bal!=null?w.bal:net)-net;
+  PTS.push({b,t:arr[0].t,x:null});
+  for(const x of arr){b+=dlt(x,me);PTS.push({b,t:x.t,x})}
+  const vs=PTS.map(p=>p.b),mn=Math.min(...vs),mx=Math.max(...vs),rg=(mx-mn)||1,n=PTS.length;
+  const X=i=>16+i/(n-1||1)*568,Y=v=>14+(1-(v-mn)/rg)*166;
+  const line=PTS.map((p,i)=>(i?'L':'M')+X(i).toFixed(1)+' '+Y(p.b).toFixed(1)).join(' ');
+  const d0=new Date(PTS[0].t).toLocaleDateString('es',{day:'numeric',month:'short'}),d1=new Date(PTS[n-1].t).toLocaleDateString('es',{day:'numeric',month:'short'});
+  el.innerHTML='<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff" stop-opacity=".35"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/></linearGradient></defs>'
+    +[14,97,180].map(y=>'<line x1="16" x2="584" y1="'+y+'" y2="'+y+'" stroke="#fff" stroke-opacity=".2"/>').join('')
+    +'<path d="'+line+' L584 180 L16 180 Z" fill="url(#g)"/>'
+    +'<path d="'+line+'" fill="none" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>'
+    +(n<=30?PTS.map((p,i)=>'<circle cx="'+X(i).toFixed(1)+'" cy="'+Y(p.b).toFixed(1)+'" r="4.5" fill="#2563eb" stroke="'+(p.x?(dlt(p.x,me)>=0?'#ffffff':'#ffc2c5'):'#dbe7ff')+'" stroke-width="2.5"/>').join(''):'')
+    +'<text x="16" y="216" fill="#dbe7ff" font-size="18">'+d0+'</text><text x="584" y="216" fill="#dbe7ff" font-size="18" text-anchor="end">'+d1+'</text>';
+}
+
+const dayLabel=t=>{const d=new Date(t),n=new Date(),y=new Date(Date.now()-864e5);
+  return d.toDateString()===n.toDateString()?'Hoy':d.toDateString()===y.toDateString()?'Ayer':d.toLocaleDateString('es',{weekday:'long',day:'numeric',month:'long'})};
+
+function render(){
+  $('sel').innerHTML=W.map(w=>'<option value="'+w.id+'"'+(w.id===SEL?' selected':'')+'>'+esc(w.name)+' · '+short(w.addr)+'</option>').join('');
+  const w=cur();
+  $('empty').classList.toggle('hide',!!w);$('main').classList.toggle('hide',!w);$('sel').classList.toggle('hide',!w);
+  if(w){
+    const me=w.addr.toLowerCase();
+    const all=Object.values(w.txs).sort((a,b)=>b.t-a.t);
+    let ti=0,to=0;
+    for(const x of all){if(x.to===me&&x.from!==me)ti+=x.v;if(x.from===me&&x.to!==me)to+=x.v}
+    const net=all.reduce((s,x)=>s+dlt(x,me),0);
+    $('hn').textContent=w.name+' · '+short(w.addr);
+    $('bal').textContent=fmt(w.bal!=null?w.bal:net);
+    $('tin').textContent=fmt(ti);$('tout').textContent=fmt(to);$('tn').textContent=all.length;
+    document.querySelectorAll('.chip').forEach(c=>c.classList.toggle('on',c.dataset.v===flt));
+    const arr=all.filter(x=>flt==='all'||(flt==='in'?x.to===me:x.from===me&&x.to!==me));
+    let html='',last='';
+    for(const x of arr){
+      const inc=x.to===me,k=new Date(x.t).toDateString();
+      if(k!==last){html+='<div class="day">'+dayLabel(x.t)+'</div>';last=k}
+      const v=dlt(x,me)===0?x.v:Math.abs(dlt(x,me));
+      html+='<a class="tx" href="https://bscscan.com/tx/'+x.h+'" target="_blank" rel="noopener"><span class="ic '+(inc?'in':'out')+'">'+(inc?IN:OUT)+'</span><span class="mid"><b>'+(inc?'Recibido':'Enviado')+'</b><small>'+(inc?'De ':'A ')+short(inc?x.from:x.to)+' · '+new Date(x.t).toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'})+'</small></span><span class="amt '+(inc?'in':'out')+'">'+(inc?'+':'−')+fmt(v)+'</span></a>';
+    }
+    $('list').innerHTML=html||'<div class="empty">Sin movimientos en este filtro.</div>';
+    drawChart(w);
+  }
+  $('tot').textContent=fmt(W.reduce((s,x)=>s+(x.bal||0),0));
+  $('wlist').innerHTML=W.length?W.map(w=>{
+    const ed=editId===w.id,dl=delId===w.id;
+    return '<div class="wc"><div class="wt"><div class="av">'+esc((w.name[0]||'W').toUpperCase())+'</div><div class="mid">'
+      +(ed?'<input id="ren" value="'+esc(editVal)+'" maxlength="30" style="margin:0;min-height:42px">':'<b>'+esc(w.name)+'</b><small>'+short(w.addr)+'</small>')
+      +'</div>'+(ed?'':'<div class="bal">'+(w.bal!=null?fmt(w.bal):'…')+'<small>USDT</small></div>')+'</div>'
+      +(ed?'<div class="wa"><button class="btn sm" data-a="rensave" data-id="'+w.id+'">Guardar</button><button class="btn g sm" data-a="rencancel">Cancelar</button></div>'
+      :dl?'<div class="ask"><p>¿Eliminar “'+esc(w.name)+'”? Se borra su historial guardado en este dispositivo. Tus fondos no se tocan.</p><button class="btn sm" style="background:var(--out);border-color:var(--out);color:#fff" data-a="delyes" data-id="'+w.id+'">Sí, eliminar</button><button class="btn g sm" data-a="delno">Cancelar</button></div>'
+      :'<div class="wa"><button class="btn sm" data-a="ver" data-id="'+w.id+'">Ver panel</button><button class="btn g sm" data-a="ren" data-id="'+w.id+'">Renombrar</button><button class="btn d sm" data-a="del" data-id="'+w.id+'">Eliminar</button></div>')
+      +'</div>';
+  }).join(''):'<div class="card empty">Agrega tu primera wallet con el botón de arriba.</div>';
+  renderProf();
+  if(editId){const i=$('ren');if(i&&document.activeElement!==i){i.focus();i.setSelectionRange(i.value.length,i.value.length)}}
+}
+
+const ymd=()=>new Date().toLocaleDateString('en-CA');
+function buildWB(){
+    const wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(W.map(w=>({nombre:w.name,direccion:w.addr,ultimo_bloque:w.last,dias_inicio:w.days||3,seleccionada:w.id===SEL?'si':'no'})),{header:['nombre','direccion','ultimo_bloque','dias_inicio','seleccionada']}),'Wallets');
+    const mv=[];
+    W.forEach(w=>{const me=w.addr.toLowerCase();Object.entries(w.txs).forEach(([id,x])=>mv.push({wallet:w.addr,id,fecha:new Date(x.t).toLocaleString('es'),timestamp_ms:x.t,tipo:x.to===me?'recibido':'enviado',de:x.from,para:x.to,monto_usdt:x.v}))});
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(mv,{header:['wallet','id','fecha','timestamp_ms','tipo','de','para','monto_usdt']}),'Movimientos');
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet([{nombre:PROF.name||''}],{header:['nombre']}),'Perfil');
+    return wb;
+}
+let BK=store.get('bk',{on:false,last:'',dir:''}),DIR=null,pend=false;
+const FSA='showDirectoryPicker' in window;
+const idb=()=>new Promise((res,rej)=>{const r=indexedDB.open('usdtbk',1);r.onupgradeneeded=()=>r.result.createObjectStore('h');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)});
+const hput=async h=>{const d=await idb();return new Promise((res,rej)=>{const t=d.transaction('h','readwrite');t.objectStore('h').put(h,'dir');t.oncomplete=res;t.onerror=()=>rej(t.error)})};
+const DIRP=(async()=>{try{const d=await idb();return await new Promise(res=>{const q=d.transaction('h').objectStore('h').get('dir');q.onsuccess=()=>res(q.result||null);q.onerror=()=>res(null)})}catch(e){return null}})().then(h=>{DIR=h;renderProf()});
+const bmsg=t=>$('bmsg').textContent=t;
+function needTap(){if(pend)return;pend=true;document.addEventListener('click',()=>{pend=false;autoBackup(true)},{once:true});bmsg('Toca cualquier parte de la pantalla para completar el respaldo de hoy.')}
+async function autoBackup(g,force){
+  try{
+    await DIRP;
+    if(!BK.on&&!force)return;
+    const today=ymd();
+    if(!force&&BK.last===today)return;
+    if(!window.XLSX||!W.length){if(force)bmsg('No hay datos que respaldar todavía, o no cargó el módulo de Excel.');return}
+    const name='respaldo-usdt-'+today+'.xlsx';
+    if(DIR){
+      let p=await DIR.queryPermission({mode:'readwrite'});
+      if(p!=='granted'&&g)p=await DIR.requestPermission({mode:'readwrite'});
+      if(p!=='granted')return needTap();
+      const fh=await DIR.getFileHandle(name,{create:true}),w=await fh.createWritable();
+      await w.write(XLSX.write(buildWB(),{type:'array',bookType:'xlsx'}));await w.close();
+    }else{
+      if(!g)return needTap();
+      XLSX.writeFile(buildWB(),name);
+    }
+    BK.last=today;store.set('bk',BK);bmsg('Respaldo de hoy guardado: '+name);renderProf();
+  }catch(e){bmsg('No se pudo guardar el respaldo: '+e.message)}
+}
+function renderProf(){
+  const n=PROF.name||'';
+  $('hi').firstChild.textContent=n?'Hola, '+n:'Mi billetera USDT';
+  $('pnm').textContent=n||'Tu perfil';$('pav').textContent=(n[0]||'U').toUpperCase();
+  if(document.activeElement!==$('pn'))$('pn').value=n;
+  $('pw').textContent=W.length;
+  $('pm').textContent=W.reduce((s,w)=>s+Object.keys(w.txs).length,0);
+  $('pt').textContent=fmt(W.reduce((s,w)=>s+(w.bal||0),0))+' USDT';
+  $('bkbox').innerHTML=BK.on
+    ?'<p style="margin:0 0 12px;font-size:.92rem"><b class="in">Activo</b> · '+(DIR?'carpeta: '+esc(BK.dir||'Respaldos USDT'):'se descarga en tu carpeta Descargas')+'<br><span class="mute">Último respaldo: '+(BK.last||'aún no')+'</span></p><button class="btn sm" data-a="bknow">Respaldar ahora</button> '+(FSA?'<button class="btn g sm" data-a="bkpick">Cambiar carpeta</button> ':'')+'<button class="btn d sm" data-a="bkoff">Desactivar</button>'
+    :'<p style="margin:0 0 12px;font-size:.92rem"><b>Desactivado</b></p>'+(FSA?'<button class="btn" data-a="bkpick">Elegir carpeta y activar</button> <button class="btn g" data-a="bkon">Usar Descargas</button>':'<button class="btn" data-a="bkon">Activar (se guarda en Descargas)</button>');
+  if(KEY&&!$('mkmsg').textContent)$('mkmsg').textContent='Clave guardada en este dispositivo.';
+  $('wipe').innerHTML=wipeAsk?'<div class="ask"><p>¿Borrar todas las wallets y su historial de este dispositivo? Tus fondos no se tocan.</p><button class="btn sm" style="background:var(--out);border-color:var(--out);color:#fff" data-a="wipeyes">Sí, borrar todo</button><button class="btn g sm" data-a="wipeno">Cancelar</button></div>':'<button class="btn d sm" data-a="wipe">Borrar todos los datos</button>';
+}
+function tab(t){
+  for(const k of ['panel','wallets','perfil']){$('v-'+k).classList.toggle('hide',t!==k);$('t-'+k).classList.toggle('on',t===k)}
+  window.scrollTo(0,0);if(t==='wallets')refreshBals();
+}
+async function refreshBals(){
+  await Promise.all(W.map(async w=>{try{w.bal=await balanceOf(w.addr)}catch(e){}}));
+  save();render();
+}
+
+document.addEventListener('click',e=>{
+  const el=e.target.closest('[data-a]');if(!el)return;
+  const a=el.dataset.a,id=+el.dataset.id,w=W.find(x=>x.id===id);
+  if(a==='tab')tab(el.dataset.v);
+  else if(a==='flt'){flt=el.dataset.v;render()}
+  else if(a==='upd')sync(cur());
+  else if(a==='csv'){
+    const c=cur();if(!c)return;const me=c.addr.toLowerCase();
+    const rows=['fecha,tipo,monto_usdt,contraparte,hash'];
+    Object.values(c.txs).sort((x,y)=>x.t-y.t).forEach(x=>{const inc=x.to===me;rows.push([new Date(x.t).toISOString(),inc?'recibido':'enviado',x.v,inc?x.from:x.to,x.h].join(','))});
+    const l=document.createElement('a');l.href=URL.createObjectURL(new Blob([rows.join('\n')],{type:'text/csv'}));
+    l.download=c.name.replace(/\W+/g,'_')+'.csv';l.click();
+  }
+  else if(a==='psave'){PROF.name=$('pn').value.trim();store.set('prof',PROF);renderProf();$('pmsg').textContent='Perfil guardado.'}
+  else if(a==='backup'){
+    if(!window.XLSX)return $('pmsg').textContent='No se cargó el módulo de Excel. Revisa tu conexión y recarga la página.';
+    XLSX.writeFile(buildWB(),'respaldo-usdt-'+ymd()+'.xlsx');$('pmsg').textContent='Respaldo en Excel descargado.';
+  }
+  else if(a==='bkon'){BK.on=true;DIR=null;store.set('bk',BK);renderProf();autoBackup(true,true)}
+  else if(a==='bkoff'){BK.on=false;store.set('bk',BK);renderProf();bmsg('')}
+  else if(a==='bknow')autoBackup(true,true);
+  else if(a==='bkpick'){
+    (async()=>{try{
+      const root=await showDirectoryPicker({mode:'readwrite'});
+      const sub=await root.getDirectoryHandle('Respaldos USDT',{create:true});
+      await hput(sub);DIR=sub;BK.on=true;BK.dir=root.name+' / Respaldos USDT';store.set('bk',BK);
+      renderProf();await autoBackup(true,true);
+    }catch(e){if(e.name!=='AbortError')bmsg('No se pudo usar esa carpeta: '+e.message)}})();
+  }
+  else if(a==='mksave'){
+    KEY=$('mk').value.trim();store.set('mkey',KEY);$('mk').value='';W.forEach(w=>{w.fullFail=false});save();
+    $('mkmsg').textContent=KEY?'Clave guardada en este dispositivo. Se cargará el historial completo en la próxima sincronización, o pulsa el botón de al lado.':'Clave borrada.';
+  }
+  else if(a==='full'){
+    if(!KEY)return $('mkmsg').textContent='Primero guarda tu clave de MegaNode.';
+    if(!cur())return $('mkmsg').textContent='Primero agrega una wallet.';
+    tab('panel');sync(cur(),true);
+  }
+  else if(a==='restore')$('rf').click();
+  else if(a==='wipe'){wipeAsk=true;renderProf()}
+  else if(a==='wipeno'){wipeAsk=false;renderProf()}
+  else if(a==='wipeyes'){W=[];SEL=null;wipeAsk=false;save();render();$('pmsg').textContent='Datos borrados.'}
+  else if(a==='toggleadd'){const f=$('addForm');f.classList.toggle('hide');$('addBtn').textContent=f.classList.contains('hide')?'+ Agregar wallet':'Cerrar'}
+  else if(a==='add'){
+    const ad=$('wa').value.trim(),n=$('wn').value.trim()||'Wallet '+(W.length+1);
+    if(!/^0x[0-9a-fA-F]{40}$/.test(ad))return $('wmsg').textContent='La dirección no es válida.';
+    if(W.some(x=>x.addr.toLowerCase()===ad.toLowerCase()))return $('wmsg').textContent='Esa wallet ya está agregada.';
+    const nw={id:Date.now(),name:n,addr:ad,last:0,txs:{},bal:null,days:7};
+    W.push(nw);SEL=nw.id;save();$('wa').value='';$('wn').value='';$('wmsg').textContent='';
+    $('addForm').classList.add('hide');$('addBtn').textContent='+ Agregar wallet';
+    tab('panel');render();sync(nw);
+  }
+  else if(a==='conn'){
+    const p=window.safepalProvider||window.ethereum;
+    if(!p)return $('wmsg').textContent='Abre esta página desde el navegador DApp de SafePal, o pega la dirección a mano.';
+    p.request({method:'eth_requestAccounts'}).then(r=>{$('wa').value=r[0]}).catch(()=>{$('wmsg').textContent='No se pudo conectar.'});
+  }
+  else if(a==='ver'&&w){SEL=w.id;save();tab('panel');render();if(!w.last)sync(w)}
+  else if(a==='ren'&&w){editId=w.id;editVal=w.name;delId=null;render()}
+  else if(a==='rencancel'){editId=null;render()}
+  else if(a==='rensave'&&w){const v=(editVal||'').trim();if(v)w.name=v;editId=null;save();render()}
+  else if(a==='del'&&w){delId=w.id;editId=null;render()}
+  else if(a==='delno'){delId=null;render()}
+  else if(a==='delyes'&&w){W=W.filter(x=>x.id!==w.id);if(SEL===w.id)SEL=W[0]?W[0].id:null;delId=null;save();render()}
+});
+document.addEventListener('input',e=>{if(e.target.id==='ren')editVal=e.target.value});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='ren'){const w=W.find(x=>x.id===editId);if(w){const v=editVal.trim();if(v)w.name=v;editId=null;save();render()}}});
+$('rf').onchange=e=>{
+  const f=e.target.files[0];if(!f)return;
+  const json=/\.json$/i.test(f.name),r=new FileReader();
+  r.onload=()=>{try{
+    let list,sel,name;
+    if(json){
+      const d=JSON.parse(r.result);list=d.list;sel=d.sel;name=d.prof&&d.prof.name;
+    }else{
+      if(!window.XLSX)throw 0;
+      const wb=XLSX.read(r.result,{type:'array'});
+      const ws=n=>wb.Sheets[n]?XLSX.utils.sheet_to_json(wb.Sheets[n],{defval:''}):[];
+      list=ws('Wallets').map((x,i)=>({id:Date.now()+i,name:String(x.nombre||'Wallet'),addr:String(x.direccion).trim(),last:+x.ultimo_bloque||0,txs:{},days:+x.dias_inicio||3,sel:x.seleccionada==='si'}));
+      ws('Movimientos').forEach(m=>{
+        const w=list.find(q=>q.addr.toLowerCase()===String(m.wallet).trim().toLowerCase()),t=+m.timestamp_ms;
+        if(!w||!m.id||!t)return;
+        w.txs[String(m.id)]={h:String(m.id).split(':')[0],t,from:String(m.de).toLowerCase(),to:String(m.para).toLowerCase(),v:+m.monto_usdt||0};
+      });
+      const sw=list.find(w=>w.sel);sel=sw&&sw.id;name=(ws('Perfil')[0]||{}).nombre;
+    }
+    if(!Array.isArray(list)||!list.length||list.some(w=>!/^0x[0-9a-fA-F]{40}$/.test(w.addr||'')))throw 0;
+    W=list.map(w=>({id:w.id,name:String(w.name||'Wallet').slice(0,30),addr:w.addr,last:+w.last||0,txs:w.txs||{},bal:null,days:w.days||3}));
+    SEL=W.some(w=>w.id===sel)?sel:W[0].id;
+    if(typeof name==='string'&&name){PROF={name:name.slice(0,30)};store.set('prof',PROF)}
+    save();render();$('pmsg').textContent='Respaldo cargado. Actualizando los movimientos nuevos…';
+    const c=cur();if(c)sync(c);
+  }catch(x){$('pmsg').textContent='No pude leer ese archivo. Usa el Excel que descargaste desde esta página.'}};
+  json?r.readAsText(f):r.readAsArrayBuffer(f);e.target.value='';
+};
+$('sel').onchange=e=>{SEL=+e.target.value;save();render();const w=cur();if(w&&!w.last)sync(w)};
+$('chart').onclick=e=>{
+  if(!PTS.length)return;
+  const r=e.currentTarget.getBoundingClientRect(),me=cur().addr.toLowerCase();
+  const i=Math.max(0,Math.min(PTS.length-1,Math.round((e.clientX-r.left)/r.width*(PTS.length-1))));
+  const p=PTS[i];
+  $('ci').textContent=p.x?new Date(p.t).toLocaleString('es')+' · '+(dlt(p.x,me)>=0?'+':'−')+fmt(Math.abs(dlt(p.x,me)))+' · Saldo '+fmt(p.b):'Saldo antes del primer movimiento: '+fmt(p.b);
+};
+
+render();
+if(!W.length)tab('wallets');else{const w=cur();if(w)sync(w)}
+setInterval(()=>{const w=cur();if(w&&w.last&&!document.hidden)sync(w)},60000);
+</script>
+</body>
+</html>
