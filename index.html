@@ -110,7 +110,7 @@ nav button svg{width:24px;height:24px}nav button.on{color:var(--acc);background:
     <label for="wa">Dirección (empieza con 0x)</label>
     <input id="wa" placeholder="0x..." autocomplete="off">
     <p class="mute" style="font-size:.85rem;margin:0 0 12px">Al vincular, la página trae sola los movimientos y el saldo actual.</p>
-    <button class="btn" data-a="add">Vincular wallet</button> <button class="btn g" data-a="conn">Conectar SafePal</button>
+    <button class="btn" data-a="add">Vincular wallet</button>
     <div id="wmsg" class="mute" style="font-size:.88rem;margin-top:10px"></div>
   </div>
   <div id="wlist"></div>
@@ -201,7 +201,19 @@ const pad=a=>'0x'+a.toLowerCase().replace('0x','').padStart(64,'0');
 const hex=n=>'0x'+n.toString(16);
 const tsOf=async n=>parseInt((await rpc('eth_getBlockByNumber',[hex(n),false])).timestamp,16)*1000;
 const balanceOf=async a=>Number(BigInt(await rpc('eth_call',[{to:USDT,data:'0x70a08231'+pad(a).slice(2)},'latest'])))/1e18;
-const setProg=(p,t)=>{$('linkBar').style.width=p+'%';$('linkTxt').textContent=t};
+const PROG={},BUSY=new Set();
+function setProg(id,p){
+  PROG[id]={p};
+  if(id===SEL){$('linkBar').style.width=p+'%';$('linkTxt').textContent='Vinculando wallet… '+p+'%'}
+  const e=$('vp-'+id);if(e)e.textContent='Vinculando… '+p+'%';
+}
+const say=(w,t)=>{if(w.id===SEL)$('msg').textContent=t};
+function updLink(){
+  const w=cur(),pr=w&&BUSY.has(w.id)&&PROG[w.id];
+  $('link').classList.toggle('hide',!pr);
+  if(pr){$('linkBar').style.width=pr.p+'%';$('linkTxt').textContent='Vinculando wallet… '+pr.p+'%'}
+}
+const lk=w=>BUSY.has(w.id)&&PROG[w.id]?' <span id="vp-'+w.id+'" class="out" style="font-size:.78rem;font-weight:600">Vinculando… '+PROG[w.id].p+'%</span>':'';
 
 async function scan(w,from,to,first){
   let size=5000,found=0;const bt={},me=w.addr.toLowerCase();
@@ -220,7 +232,7 @@ async function scan(w,from,to,first){
       }
       start=end+1;
       const p=Math.min(100,Math.round((start-from)/(to-from+1)*100));
-      first?setProg(p,'Vinculando wallet… '+p+'%'):$('msg').textContent='Actualizando… '+p+'%';
+      first?setProg(w.id,p):say(w,'Actualizando… '+p+'%');
     }catch(e){if(size>500)size=Math.floor(size/2);else throw e}
   }
   return found;
@@ -259,7 +271,7 @@ async function fullHistory(w,latest){
         last=Math.max(last,bn);
       }
       const pct=Math.min(99,Math.round(last/latest*100));
-      setProg(pct,'Vinculando wallet… '+pct+'%');
+      setProg(w.id,pct);
       pk=res.pageKey||'';
       if(!pk)break;
     }
@@ -270,10 +282,11 @@ async function fullHistory(w,latest){
 }
 
 async function sync(w,forceFull){
-  if(busy||!w)return;busy=true;
+  if(!w||BUSY.has(w.id))return;
+  BUSY.add(w.id);
   const wantFull=!!KEY&&(forceFull||(!w.full&&!w.fullFail));
   const first=!w.last||wantFull;
-  if(first){$('link').classList.remove('hide');setProg(0,'Vinculando wallet…')}
+  if(first){PROG[w.id]={p:0};render()}
   let note='';
   try{
     const latest=parseInt(await rpc('eth_blockNumber',[]),16);
@@ -293,9 +306,9 @@ async function sync(w,forceFull){
       w.last=latest;
     }
     w.bal=await balanceOf(w.addr);save();
-    $('msg').textContent=note||(first?'':n+' movimientos nuevos · '+new Date().toLocaleTimeString('es'));
-  }catch(e){$('msg').textContent='Error: '+e.message+'. Intenta de nuevo en un momento.'}
-  $('link').classList.add('hide');busy=false;render();autoBackup(false);
+    say(w,note||(first?'':n+' movimientos nuevos · '+new Date().toLocaleTimeString('es')));
+  }catch(e){say(w,'Error: '+e.message+'. Intenta de nuevo en un momento.')}
+  BUSY.delete(w.id);delete PROG[w.id];render();autoBackup(false);
 }
 
 function drawChart(w){
@@ -323,6 +336,7 @@ const dayLabel=t=>{const d=new Date(t),n=new Date(),y=new Date(Date.now()-864e5)
   return d.toDateString()===n.toDateString()?'Hoy':d.toDateString()===y.toDateString()?'Ayer':d.toLocaleDateString('es',{weekday:'long',day:'numeric',month:'long'})};
 
 function render(){
+  updLink();
   $('sel').innerHTML=W.map(w=>'<option value="'+w.id+'"'+(w.id===SEL?' selected':'')+'>'+esc(w.name)+' · '+short(w.addr)+'</option>').join('');
   const w=cur();
   $('empty').classList.toggle('hide',!!w);$('main').classList.toggle('hide',!w);$('sel').classList.toggle('hide',!w);
@@ -351,7 +365,7 @@ function render(){
   $('wlist').innerHTML=W.length?W.map(w=>{
     const ed=editId===w.id,dl=delId===w.id;
     return '<div class="wc"><div class="wt"><div class="av">'+esc((w.name[0]||'W').toUpperCase())+'</div><div class="mid">'
-      +(ed?'<input id="ren" value="'+esc(editVal)+'" maxlength="30" style="margin:0;min-height:42px">':'<b>'+esc(w.name)+'</b><small>'+short(w.addr)+'</small>')
+      +(ed?'<input id="ren" value="'+esc(editVal)+'" maxlength="30" style="margin:0;min-height:42px">':'<b>'+esc(w.name)+lk(w)+'</b><small>'+short(w.addr)+'</small>')
       +'</div>'+(ed?'':'<div class="bal">'+(w.bal!=null?fmt(w.bal):'…')+'<small>USDT</small></div>')+'</div>'
       +(ed?'<div class="wa"><button class="btn sm" data-a="rensave" data-id="'+w.id+'">Guardar</button><button class="btn g sm" data-a="rencancel">Cancelar</button></div>'
       :dl?'<div class="ask"><p>¿Eliminar “'+esc(w.name)+'”? Se borra su historial guardado en este dispositivo. Tus fondos no se tocan.</p><button class="btn sm" style="background:var(--out);border-color:var(--out);color:#fff" data-a="delyes" data-id="'+w.id+'">Sí, eliminar</button><button class="btn g sm" data-a="delno">Cancelar</button></div>'
@@ -475,11 +489,6 @@ document.addEventListener('click',e=>{
     $('addForm').classList.add('hide');$('addBtn').textContent='+ Agregar wallet';
     tab('panel');render();sync(nw);
   }
-  else if(a==='conn'){
-    const p=window.safepalProvider||window.ethereum;
-    if(!p)return $('wmsg').textContent='Abre esta página desde el navegador DApp de SafePal, o pega la dirección a mano.';
-    p.request({method:'eth_requestAccounts'}).then(r=>{$('wa').value=r[0]}).catch(()=>{$('wmsg').textContent='No se pudo conectar.'});
-  }
   else if(a==='ver'&&w){SEL=w.id;save();tab('panel');render();if(!w.last)sync(w)}
   else if(a==='ren'&&w){editId=w.id;editVal=w.name;delId=null;render()}
   else if(a==='rencancel'){editId=null;render()}
@@ -518,7 +527,7 @@ $('rf').onchange=e=>{
   }catch(x){$('pmsg').textContent='No pude leer ese archivo. Usa el Excel que descargaste desde esta página.'}};
   json?r.readAsText(f):r.readAsArrayBuffer(f);e.target.value='';
 };
-$('sel').onchange=e=>{SEL=+e.target.value;save();render();const w=cur();if(w&&!w.last)sync(w)};
+$('sel').onchange=e=>{SEL=+e.target.value;save();$('msg').textContent='';render();const w=cur();if(w&&!w.last)sync(w)};
 $('chart').onclick=e=>{
   if(!PTS.length)return;
   const r=e.currentTarget.getBoundingClientRect(),me=cur().addr.toLowerCase();
@@ -528,8 +537,8 @@ $('chart').onclick=e=>{
 };
 
 render();
-if(!W.length)tab('wallets');else{const w=cur();if(w)sync(w)}
-setInterval(()=>{const w=cur();if(w&&w.last&&!document.hidden)sync(w)},60000);
+if(!W.length)tab('wallets');else W.forEach(w=>sync(w));
+setInterval(()=>{if(!document.hidden)W.forEach(w=>{if(w.last)sync(w)})},60000);
 </script>
 </body>
 </html>
